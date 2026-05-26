@@ -1,4 +1,4 @@
-name: 🚀 DevSecOps CI/CD Pipeline
+name: 🚀 Backend DevSecOps CI Pipeline
 
 on:
   push:
@@ -22,51 +22,19 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: 📦 Restore Dependencies
-        run: dotnet restore backend/
+        run: dotnet restore
 
       - name: 🛡️ Security - NuGet Vulnerability Check
-        run: dotnet list backend/ package --vulnerable
+        run: dotnet list package --vulnerable
 
       - name: 🔨 Build Backend
-        run: dotnet build backend/ --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: 🧪 Run Backend Tests
-        run: dotnet test backend/ --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal
 
   # ==========================================
-  # JOB 2: FRONTEND CI & SECURITY (Angular)
-  # ==========================================
-  frontend-ci:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: 📦 Install Dependencies
-        run: |
-          cd frontend
-          npm ci
-
-      - name: 🛡️ Security - npm Audit
-        # Checks node_modules/PrimeNG ecosystem for vulnerabilities
-        run: |
-          cd frontend
-          npm audit --audit-level=high
-
-      - name: 🔨 Build Angular App
-        run: |
-          cd frontend
-          npx ng build --configuration production
-
-  # ==========================================
-  # JOB 3: ADVANCED SAST SCANNING (CodeQL)
+  # JOB 2: STATIC CODE ANALYSIS (CodeQL)
   # ==========================================
   codeql-security:
     name: 🛡️ CodeQL Static Analysis
@@ -83,16 +51,15 @@ jobs:
       - name: ⚙️ Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: "csharp, javascript-typescript"
+          languages: "csharp" # Stripped out javascript-typescript
 
-      # CodeQL requires a build step for compiled languages like C#
       - name: ⚙️ Setup .NET for CodeQL
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
       - name: 🔨 Build Backend for Analysis
-        run: dotnet build backend/
+        run: dotnet build
 
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
