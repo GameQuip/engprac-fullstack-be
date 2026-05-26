@@ -30,3 +30,12 @@ yarn-error.log*
 # System Files
 .DS_Store
 Thumbs.db
+
+
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.env
+appsettings.Development.json

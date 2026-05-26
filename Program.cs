@@ -22,10 +22,11 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-    ));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<JobRepository>();
 builder.Services.AddScoped<JobService>();
