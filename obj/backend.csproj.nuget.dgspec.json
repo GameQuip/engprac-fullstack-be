@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\g_com\\Documents\\eng-practice\\exercise\\fullstack\\backend\\backend.csproj": {}
+    "C:\\Users\\User\\Desktop\\intern\\Project\\engprac-fullstack-be\\backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\g_com\\Documents\\eng-practice\\exercise\\fullstack\\backend\\backend.csproj": {
+    "C:\\Users\\User\\Desktop\\intern\\Project\\engprac-fullstack-be\\backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\g_com\\Documents\\eng-practice\\exercise\\fullstack\\backend\\backend.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\intern\\Project\\engprac-fullstack-be\\backend.csproj",
         "projectName": "backend",
-        "projectPath": "C:\\Users\\g_com\\Documents\\eng-practice\\exercise\\fullstack\\backend\\backend.csproj",
-        "packagesPath": "C:\\Users\\g_com\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\g_com\\Documents\\eng-practice\\exercise\\fullstack\\backend\\obj\\",
+        "projectPath": "C:\\Users\\User\\Desktop\\intern\\Project\\engprac-fullstack-be\\backend.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\intern\\Project\\engprac-fullstack-be\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\g_com\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -46,13 +48,27 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "DotNetEnv": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[10.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.8, )"
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[10.0.1, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[10.1.7, )"
             }
           },
           "imports": [

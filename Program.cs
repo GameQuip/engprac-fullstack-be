@@ -1,11 +1,18 @@
+using Backend.Data;
+using Backend.Repositories;
+using Backend.Services;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-//using Backend.Infrastructure;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
@@ -15,9 +22,13 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ));
 
-//builder.Services.AddDbContext<MyDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddScoped<JobRepository>();
+builder.Services.AddScoped<JobService>();
 
 builder.Services.AddControllers();
 
@@ -27,6 +38,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
