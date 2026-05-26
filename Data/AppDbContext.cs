@@ -33,6 +33,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<JobApplication>(entity =>
         {
             entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => new { e.JobId, e.UserId }).IsUnique();
             entity.HasOne(e => e.Job)
                 .WithMany(j => j.Applications)
                 .HasForeignKey(e => e.JobId)
