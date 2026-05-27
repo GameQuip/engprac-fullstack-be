@@ -22,26 +22,26 @@ A full-stack job tracking application built with Angular and ASP.NET Core. Suppo
 
 ### Frontend (`engprac-fullstack-fe`)
 
-| | |
-|---|---|
-| Framework | Angular 21 (Standalone Components, Zoneless) |
-| UI Library | PrimeNG 21 with Aura theme |
-| State Management | Angular Signals |
-| HTTP | HttpClient with JWT interceptor |
-| Routing | Angular Router with auth guards |
-| Forms | Reactive Forms with validation |
+|                  |                                              |
+| ---------------- | -------------------------------------------- |
+| Framework        | Angular 21 (Standalone Components, Zoneless) |
+| UI Library       | PrimeNG 21 with Aura theme                   |
+| State Management | Angular Signals                              |
+| HTTP             | HttpClient with JWT interceptor              |
+| Routing          | Angular Router with auth guards              |
+| Forms            | Reactive Forms with validation               |
 
 ### Backend (`engprac-fullstack-be`)
 
-| | |
-|---|---|
-| Framework | ASP.NET Core 10 Web API |
-| ORM | Entity Framework Core 10 |
-| Database | PostgreSQL (Docker local / Neon production) |
-| Authentication | JWT Bearer tokens |
-| Password Hashing | BCrypt.Net |
-| Documentation | Swagger / OpenAPI |
-| Pattern | Repository + Service pattern |
+|                  |                                             |
+| ---------------- | ------------------------------------------- |
+| Framework        | ASP.NET Core 10 Web API                     |
+| ORM              | Entity Framework Core 10                    |
+| Database         | PostgreSQL (Docker local / Neon production) |
+| Authentication   | JWT Bearer tokens                           |
+| Password Hashing | BCrypt.Net                                  |
+| Documentation    | Swagger / OpenAPI                           |
+| Pattern          | Repository + Service pattern                |
 
 ---
 
@@ -78,22 +78,22 @@ engprac-fullstack-fe/          # Frontend
 
 ## API Endpoints
 
-| Method | Endpoint | Role | Description |
-|--------|----------|------|-------------|
-| POST | `/api/v1/auth/register` | Public | Register new account |
-| POST | `/api/v1/auth/login` | Public | Login and receive JWT |
-| GET | `/api/v1/jobs` | Any | List all jobs |
-| GET | `/api/v1/jobs/{id}` | Any | Get job by ID |
-| POST | `/api/v1/jobs` | Admin | Create job |
-| PUT | `/api/v1/jobs/{id}` | Admin | Update job |
-| DELETE | `/api/v1/jobs/{id}` | Admin | Delete job |
-| POST | `/api/v1/applications` | User | Apply to a job |
-| GET | `/api/v1/applications` | Admin | Get all applications |
-| GET | `/api/v1/applications/my` | User | Get my applications |
-| DELETE | `/api/v1/applications/my/{id}` | User | Cancel application |
-| PATCH | `/api/v1/applications/{id}/status` | Admin | Update application status |
-| GET | `/api/v1/users` | Any | List all users |
-| GET | `/api/v1/dashboard/summary` | Any | Get stats summary |
+| Method | Endpoint                           | Role   | Description               |
+| ------ | ---------------------------------- | ------ | ------------------------- |
+| POST   | `/api/v1/auth/register`            | Public | Register new account      |
+| POST   | `/api/v1/auth/login`               | Public | Login and receive JWT     |
+| GET    | `/api/v1/jobs`                     | Any    | List all jobs             |
+| GET    | `/api/v1/jobs/{id}`                | Any    | Get job by ID             |
+| POST   | `/api/v1/jobs`                     | Admin  | Create job                |
+| PUT    | `/api/v1/jobs/{id}`                | Admin  | Update job                |
+| DELETE | `/api/v1/jobs/{id}`                | Admin  | Delete job                |
+| POST   | `/api/v1/applications`             | User   | Apply to a job            |
+| GET    | `/api/v1/applications`             | Admin  | Get all applications      |
+| GET    | `/api/v1/applications/my`          | User   | Get my applications       |
+| DELETE | `/api/v1/applications/my/{id}`     | User   | Cancel application        |
+| PATCH  | `/api/v1/applications/{id}/status` | Admin  | Update application status |
+| GET    | `/api/v1/users`                    | Any    | List all users            |
+| GET    | `/api/v1/dashboard/summary`        | Any    | Get stats summary         |
 
 ---
 
@@ -135,21 +135,21 @@ App runs at `http://localhost:4200`
 
 ### Demo Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
+| Email             | Password    | Role  |
+| ----------------- | ----------- | ----- |
 | alice@example.com | password123 | Admin |
-| bob@example.com | password123 | User |
-| carol@example.com | password123 | User |
+| bob@example.com   | password123 | User  |
+| carol@example.com | password123 | User  |
 
 ---
 
 ## Deployment
 
-| Service | Purpose |
-|---------|---------|
-| [Vercel](https://vercel.com) | Frontend hosting |
-| [Render](https://render.com) | Backend hosting |
-| [Neon](https://neon.tech) | PostgreSQL database |
+| Service                      | Purpose             |
+| ---------------------------- | ------------------- |
+| [Vercel](https://vercel.com) | Frontend hosting    |
+| [Render](https://render.com) | Backend hosting     |
+| [Neon](https://neon.tech)    | PostgreSQL database |
 
 ### Render Setup
 
@@ -159,30 +159,30 @@ App runs at `http://localhost:4200`
 4. Leave Root Directory empty.
 5. Add these environment variables on Render:
 
-| Key | Value |
-|-----|-------|
-| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string |
-| `JwtSettings__Secret` | Random secret key (32+ characters) |
-| `AllowedOrigins` | Your deployed frontend URL |
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
+| Key                                    | Value                              |
+| -------------------------------------- | ---------------------------------- |
+| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string  |
+| `JwtSettings__Secret`                  | Random secret key (32+ characters) |
+| `AllowedOrigins`                       | Your deployed frontend URL         |
+| `ASPNETCORE_ENVIRONMENT`               | `Production`                       |
 
 6. Deploy the service and verify Swagger at `/swagger`.
 
-The Docker image listens on port `8080`, which matches the included [Dockerfile](Dockerfile).
+The Docker image listens on the Render `PORT` value when it exists, and falls back to `8080` locally.
 
 ### Environment Variables (Render)
 
-| Key | Value |
-|-----|-------|
-| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string |
-| `JwtSettings__Secret` | Random secret key (32+ characters) |
-| `AllowedOrigins` | Vercel frontend URL |
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
+| Key                                    | Value                              |
+| -------------------------------------- | ---------------------------------- |
+| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string  |
+| `JwtSettings__Secret`                  | Random secret key (32+ characters) |
+| `AllowedOrigins`                       | Vercel frontend URL                |
+| `ASPNETCORE_ENVIRONMENT`               | `Production`                       |
 
 ### Vercel Build Settings
 
-| Setting | Value |
-|---------|-------|
-| Framework Preset | Angular |
-| Build Command | `npm run build` |
+| Setting          | Value                   |
+| ---------------- | ----------------------- |
+| Framework Preset | Angular                 |
+| Build Command    | `npm run build`         |
 | Output Directory | `dist/frontend/browser` |
