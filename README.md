@@ -1,127 +1,167 @@
-# JobTrack — Full-Stack App
+# JobTrack
 
-Angular 21 + ASP.NET Core 10 + PostgreSQL
+A full-stack job tracking application built with Angular and ASP.NET Core. Supports role-based access control for Admins and Users to manage job listings and applications.
 
----
-
-## Run Locally
-
-### Prerequisites
-- .NET 10 SDK
-- Node.js 20+
-- Docker Desktop
-
-### Backend
-
-```bash
-cd engprac-fullstack-be
-docker compose up -d        # start PostgreSQL
-dotnet run                  # http://localhost:5118
-```
-
-Swagger: http://localhost:5118/swagger
-
-### Frontend
-
-```bash
-cd engprac-fullstack-fe
-npm install
-npm start                   # http://localhost:4200
-```
-
-Demo accounts:
-- Admin: `alice@example.com` / `password123`
-- User: `bob@example.com` / `password123`
+**Live Demo:** [https://engprac-fullstack-fe.vercel.app/]
+**API:** [https://engprac-fullstack-be.onrender.com/swagger]
 
 ---
 
-## Deploy to Production
+## Features
 
-### ลำดับ deploy
-
-```
-Step 1 → Neon   (Database)
-Step 2 → Render (Backend)
-Step 3 → แก้ environment.prod.ts
-Step 4 → Vercel (Frontend)
-Step 5 → อัปเดต CORS บน Render
-```
-
----
-
-### Step 1 — Neon (Database)
-
-1. สมัคร https://neon.tech → **Create Project**
-2. Region: `ap-southeast-1` (Singapore)
-3. Copy **Connection String**:
-   ```
-   postgresql://user:pass@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-   ```
-
----
-
-### Step 2 — Render (Backend)
-
-1. สมัคร https://render.com → **New → Web Service**
-2. Connect GitHub repo → Root Directory: `engprac-fullstack-be`
-3. Runtime: **Docker** | Region: **Singapore**
-4. เพิ่ม Environment Variables:
-
-| Key | Value |
-|-----|-------|
-| `ConnectionStrings__DefaultConnection` | `<Neon connection string>` |
-| `JwtSettings__Secret` | `<random string 32+ ตัว>` |
-| `AllowedOrigins` | `https://your-app.vercel.app` *(ใส่ทีหลังได้)* |
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
-
-5. Deploy → Copy URL เช่น `https://jobtrack-api.onrender.com`
-
-> Render free tier จะ sleep หลังไม่มี traffic 15 นาที — request แรกจะช้า ~30 วิ
-
----
-
-### Step 3 — แก้ Frontend ก่อน deploy
-
-แก้ไฟล์ `engprac-fullstack-fe/src/environments/environment.prod.ts`:
-
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://jobtrack-api.onrender.com/api'  // ← URL จาก Step 2
-};
-```
-
----
-
-### Step 4 — Vercel (Frontend)
-
-1. สมัคร https://vercel.com → **New Project**
-2. Connect GitHub repo → Root Directory: `engprac-fullstack-fe`
-3. Settings:
-   - **Framework Preset**: Angular
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist/frontend/browser`
-4. Deploy → Copy URL เช่น `https://jobtrack.vercel.app`
-
----
-
-### Step 5 — อัปเดต CORS บน Render
-
-Render Dashboard → Environment → แก้:
-
-```
-AllowedOrigins = https://jobtrack.vercel.app
-```
-
-Save → Render redeploy อัตโนมัติ ✅
+- **Authentication** — JWT-based login and registration with BCrypt password hashing
+- **Role-based Access** — Admin and User roles with different permissions
+- **Job Management** — Admins can create, edit, and delete job listings
+- **Job Applications** — Users can apply to open jobs and track their application status
+- **Admin Controls** — Admins can view all applications and update status (Pass / Fail)
+- **Dashboard** — Overview stats for total jobs, users, and applications
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Angular 21, PrimeNG 21, Signals |
-| Backend | ASP.NET Core 10, EF Core, JWT |
-| Database | PostgreSQL (Docker local / Neon prod) |
-| Auth | JWT Bearer + BCrypt |
+### Frontend (`engprac-fullstack-fe`)
+
+| | |
+|---|---|
+| Framework | Angular 21 (Standalone Components, Zoneless) |
+| UI Library | PrimeNG 21 with Aura theme |
+| State Management | Angular Signals |
+| HTTP | HttpClient with JWT interceptor |
+| Routing | Angular Router with auth guards |
+| Forms | Reactive Forms with validation |
+
+### Backend (`engprac-fullstack-be`)
+
+| | |
+|---|---|
+| Framework | ASP.NET Core 10 Web API |
+| ORM | Entity Framework Core 10 |
+| Database | PostgreSQL (Docker local / Neon production) |
+| Authentication | JWT Bearer tokens |
+| Password Hashing | BCrypt.Net |
+| Documentation | Swagger / OpenAPI |
+| Pattern | Repository + Service pattern |
+
+---
+
+## Project Structure
+
+```
+engprac-fullstack-be/          # Backend
+├── Controllers/               # API endpoints
+├── Data/                      # EF Core DbContext
+├── DTOs/                      # Request & response models
+├── Infrastructure/            # RoleAuthorize attribute
+├── Migrations/                # EF Core migrations
+├── Models/                    # Domain entities
+├── Repositories/              # Data access layer
+├── Services/                  # Business logic layer
+└── Program.cs                 # App configuration
+
+engprac-fullstack-fe/          # Frontend
+└── src/app/
+    ├── core/
+    │   ├── guards/            # Auth & guest route guards
+    │   ├── interceptors/      # JWT Bearer interceptor
+    │   ├── models/            # TypeScript interfaces
+    │   └── services/          # API service layer
+    ├── layout/                # App shell with sidebar
+    └── pages/
+        ├── auth/              # Login & register
+        ├── dashboard/         # Stats overview
+        ├── jobs/              # Job listing & management
+        └── applications/      # Application tracking
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Role | Description |
+|--------|----------|------|-------------|
+| POST | `/api/v1/auth/register` | Public | Register new account |
+| POST | `/api/v1/auth/login` | Public | Login and receive JWT |
+| GET | `/api/v1/jobs` | Any | List all jobs |
+| GET | `/api/v1/jobs/{id}` | Any | Get job by ID |
+| POST | `/api/v1/jobs` | Admin | Create job |
+| PUT | `/api/v1/jobs/{id}` | Admin | Update job |
+| DELETE | `/api/v1/jobs/{id}` | Admin | Delete job |
+| POST | `/api/v1/applications` | User | Apply to a job |
+| GET | `/api/v1/applications` | Admin | Get all applications |
+| GET | `/api/v1/applications/my` | User | Get my applications |
+| DELETE | `/api/v1/applications/my/{id}` | User | Cancel application |
+| PATCH | `/api/v1/applications/{id}/status` | Admin | Update application status |
+| GET | `/api/v1/users` | Any | List all users |
+| GET | `/api/v1/dashboard/summary` | Any | Get stats summary |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 20+](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Backend
+
+```bash
+cd engprac-fullstack-be
+
+# Start PostgreSQL
+docker compose up -d
+
+# Run the API
+dotnet run
+```
+
+API runs at `http://localhost:5118`  
+Swagger UI at `http://localhost:5118/swagger`
+
+### Frontend
+
+```bash
+cd engprac-fullstack-fe
+
+npm install
+npm start
+```
+
+App runs at `http://localhost:4200`
+
+### Demo Accounts
+
+| Email | Password | Role |
+|-------|----------|------|
+| alice@example.com | password123 | Admin |
+| bob@example.com | password123 | User |
+| carol@example.com | password123 | User |
+
+---
+
+## Deployment
+
+| Service | Purpose |
+|---------|---------|
+| [Vercel](https://vercel.com) | Frontend hosting |
+| [Render](https://render.com) | Backend hosting |
+| [Neon](https://neon.tech) | PostgreSQL database |
+
+### Environment Variables (Render)
+
+| Key | Value |
+|-----|-------|
+| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string |
+| `JwtSettings__Secret` | Random secret key (32+ characters) |
+| `AllowedOrigins` | Vercel frontend URL |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+### Vercel Build Settings
+
+| Setting | Value |
+|---------|-------|
+| Framework Preset | Angular |
+| Build Command | `npm run build` |
+| Output Directory | `dist/frontend/browser` |
