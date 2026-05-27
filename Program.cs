@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using Backend.Data;
 using Backend.Models;
@@ -12,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
-var isProduction = builder.Environment.IsProduction();
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -20,9 +18,7 @@ builder.Services.AddSwaggerGen();
 
 var allowedOrigins = builder.Configuration["AllowedOrigins"]?
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-    ?? (isProduction
-        ? throw new InvalidOperationException("AllowedOrigins not configured.")
-        : ["http://localhost:4200"]);
+    ?? ["http://localhost:4200"];
 
 builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularFrontend",
@@ -49,11 +45,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-connectionString = NormalizeConnectionString(connectionString);
 if (!string.IsNullOrEmpty(connectionString))
     builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
-else if (isProduction)
-    throw new InvalidOperationException("ConnectionStrings:DefaultConnection not configured.");
 else
     builder.Services.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase("JobTrackDb"));
 
@@ -92,25 +85,19 @@ static void SeedData(AppDbContext db)
 
     var admin = new User
     {
-        FullName = "Alice Admin",
-        Email = "alice@example.com",
-        Role = "Admin",
+        FullName = "Alice Admin", Email = "alice@example.com", Role = "Admin",
         PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
         CreatedAt = DateTime.UtcNow
     };
     var user1 = new User
     {
-        FullName = "Bob User",
-        Email = "bob@example.com",
-        Role = "User",
+        FullName = "Bob User", Email = "bob@example.com", Role = "User",
         PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
         CreatedAt = DateTime.UtcNow
     };
     var user2 = new User
     {
-        FullName = "Carol User",
-        Email = "carol@example.com",
-        Role = "User",
+        FullName = "Carol User", Email = "carol@example.com", Role = "User",
         PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
         CreatedAt = DateTime.UtcNow
     };
@@ -119,35 +106,23 @@ static void SeedData(AppDbContext db)
 
     var job1 = new Job
     {
-        Title = "Software Engineer",
-        CompanyName = "TechCorp",
-        Description = "Build scalable web applications.",
-        Location = "Bangkok",
-        Status = "Open",
-        Type = "Full-time",
-        RelatedUserId = admin.Id,
+        Title = "Software Engineer", CompanyName = "TechCorp",
+        Description = "Build scalable web applications.", Location = "Bangkok",
+        Status = "Open", Type = "Full-time", RelatedUserId = admin.Id,
         CreatedAt = DateTime.UtcNow.AddDays(-10)
     };
     var job2 = new Job
     {
-        Title = "UX Designer",
-        CompanyName = "CreativeHub",
-        Description = "Design beautiful user experiences.",
-        Location = "Remote",
-        Status = "Open",
-        Type = "Contract",
-        RelatedUserId = admin.Id,
+        Title = "UX Designer", CompanyName = "CreativeHub",
+        Description = "Design beautiful user experiences.", Location = "Remote",
+        Status = "Open", Type = "Contract", RelatedUserId = admin.Id,
         CreatedAt = DateTime.UtcNow.AddDays(-5)
     };
     var job3 = new Job
     {
-        Title = "Data Analyst",
-        CompanyName = "DataFlow",
-        Description = "Analyze business data and insights.",
-        Location = "Chiang Mai",
-        Status = "Closed",
-        Type = "Full-time",
-        RelatedUserId = admin.Id,
+        Title = "Data Analyst", CompanyName = "DataFlow",
+        Description = "Analyze business data and insights.", Location = "Chiang Mai",
+        Status = "Closed", Type = "Full-time", RelatedUserId = admin.Id,
         CreatedAt = DateTime.UtcNow.AddDays(-20)
     };
     db.Jobs.AddRange(job1, job2, job3);
@@ -159,46 +134,4 @@ static void SeedData(AppDbContext db)
         new JobApplication { JobId = job1.Id, UserId = user2.Id, Status = "Applied", AppliedAt = DateTime.UtcNow.AddDays(-1) }
     );
     db.SaveChanges();
-}
-
-static string? NormalizeConnectionString(string? connectionString)
-{
-    if (string.IsNullOrWhiteSpace(connectionString))
-        return null;
-
-    if (!Uri.TryCreate(connectionString, UriKind.Absolute, out var uri) ||
-        (uri.Scheme != "postgresql" && uri.Scheme != "postgres"))
-        return connectionString;
-
-    var builder = new Npgsql.NpgsqlConnectionStringBuilder
-    {
-        Host = uri.Host,
-        Database = uri.AbsolutePath.Trim('/'),
-        Username = Uri.UnescapeDataString(uri.UserInfo.Split(':', 2)[0]),
-        Password = uri.UserInfo.Contains(':')
-            ? Uri.UnescapeDataString(uri.UserInfo.Split(':', 2)[1])
-            : string.Empty,
-        SslMode = Npgsql.SslMode.Require
-    };
-
-    if (uri.Port > 0)
-        builder.Port = uri.Port;
-
-    if (!string.IsNullOrWhiteSpace(uri.Query))
-    {
-        foreach (var parameter in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var keyValue = parameter.Split('=', 2);
-            var key = WebUtility.UrlDecode(keyValue[0]);
-            var value = keyValue.Length > 1 ? WebUtility.UrlDecode(keyValue[1]) : string.Empty;
-
-            if (string.Equals(key, "sslmode", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(value, "require", StringComparison.OrdinalIgnoreCase))
-            {
-                builder.SslMode = Npgsql.SslMode.Require;
-            }
-        }
-    }
-
-    return builder.ConnectionString;
 }
