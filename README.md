@@ -120,6 +120,8 @@ dotnet run
 API runs at `http://localhost:5118`  
 Swagger UI at `http://localhost:5118/swagger`
 
+For local development, the backend uses the PostgreSQL container from `docker compose up -d`. If `ConnectionStrings__DefaultConnection` is not set, the app falls back to in-memory storage only for development.
+
 ### Frontend
 
 ```bash
@@ -148,6 +150,25 @@ App runs at `http://localhost:4200`
 | [Vercel](https://vercel.com) | Frontend hosting |
 | [Render](https://render.com) | Backend hosting |
 | [Neon](https://neon.tech) | PostgreSQL database |
+
+### Render Setup
+
+1. Create a Neon PostgreSQL database and copy its connection string.
+2. Create a Render Web Service from this repository.
+3. Choose Docker as the runtime environment.
+4. Leave Root Directory empty.
+5. Add these environment variables on Render:
+
+| Key | Value |
+|-----|-------|
+| `ConnectionStrings__DefaultConnection` | Neon PostgreSQL connection string |
+| `JwtSettings__Secret` | Random secret key (32+ characters) |
+| `AllowedOrigins` | Your deployed frontend URL |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+6. Deploy the service and verify Swagger at `/swagger`.
+
+The Docker image listens on port `8080`, which matches the included [Dockerfile](Dockerfile).
 
 ### Environment Variables (Render)
 
