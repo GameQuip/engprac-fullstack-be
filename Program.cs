@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using Backend.Data;
 using Backend.Models;
@@ -48,6 +49,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+connectionString = NormalizeConnectionString(connectionString);
 if (!string.IsNullOrEmpty(connectionString))
     builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
 else if (isProduction)
@@ -157,4 +159,46 @@ static void SeedData(AppDbContext db)
         new JobApplication { JobId = job1.Id, UserId = user2.Id, Status = "Applied", AppliedAt = DateTime.UtcNow.AddDays(-1) }
     );
     db.SaveChanges();
+}
+
+static string? NormalizeConnectionString(string? connectionString)
+{
+    if (string.IsNullOrWhiteSpace(connectionString))
+        return null;
+
+    if (!Uri.TryCreate(connectionString, UriKind.Absolute, out var uri) ||
+        (uri.Scheme != "postgresql" && uri.Scheme != "postgres"))
+        return connectionString;
+
+    var builder = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Database = uri.AbsolutePath.Trim('/'),
+        Username = Uri.UnescapeDataString(uri.UserInfo.Split(':', 2)[0]),
+        Password = uri.UserInfo.Contains(':')
+            ? Uri.UnescapeDataString(uri.UserInfo.Split(':', 2)[1])
+            : string.Empty,
+        SslMode = Npgsql.SslMode.Require
+    };
+
+    if (uri.Port > 0)
+        builder.Port = uri.Port;
+
+    if (!string.IsNullOrWhiteSpace(uri.Query))
+    {
+        foreach (var parameter in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var keyValue = parameter.Split('=', 2);
+            var key = WebUtility.UrlDecode(keyValue[0]);
+            var value = keyValue.Length > 1 ? WebUtility.UrlDecode(keyValue[1]) : string.Empty;
+
+            if (string.Equals(key, "sslmode", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(value, "require", StringComparison.OrdinalIgnoreCase))
+            {
+                builder.SslMode = Npgsql.SslMode.Require;
+            }
+        }
+    }
+
+    return builder.ConnectionString;
 }
