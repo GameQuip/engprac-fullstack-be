@@ -4,5 +4,8 @@ public record JobCreateRequest(
     string Title,
     string CompanyName,
     string? Description,
-    string? Location
+    string? Location,
+    string Status,
+    string Type,
+    int RelatedUserId
 );

@@ -22,6 +22,12 @@ public class AppDbContext : DbContext
         {
             entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
             entity.Property(e => e.CompanyName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.HasOne(e => e.RelatedUser)
+                .WithMany()
+                .HasForeignKey(e => e.RelatedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>

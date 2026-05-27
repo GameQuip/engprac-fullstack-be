@@ -16,6 +16,7 @@ public class JobRepository
     public async Task<List<Job>> GetAllAsync()
     {
         return await _dbContext.Jobs
+            .Include(j => j.RelatedUser)
             .OrderByDescending(j => j.CreatedAt)
             .ToListAsync();
     }
@@ -23,12 +24,14 @@ public class JobRepository
     public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
+            .Include(j => j.RelatedUser)
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 
     public async Task<Job?> GetByIdForUpdateAsync(int id)
     {
         return await _dbContext.Jobs
+            .Include(j => j.RelatedUser)
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 

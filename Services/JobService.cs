@@ -16,34 +16,13 @@ public class JobService
     public async Task<List<JobResponse>> GetAllJobsAsync()
     {
         var jobs = await _jobRepository.GetAllAsync();
-
-        return jobs.Select(job => new JobResponse(
-            job.Id,
-            job.Title,
-            job.CompanyName,
-            job.Description,
-            job.Location,
-            job.CreatedAt
-        )).ToList();
+        return jobs.Select(ToResponse).ToList();
     }
 
     public async Task<JobResponse?> GetJobByIdAsync(int id)
     {
         var job = await _jobRepository.GetByIdAsync(id);
-
-        if (job is null)
-        {
-            return null;
-        }
-
-        return new JobResponse(
-            job.Id,
-            job.Title,
-            job.CompanyName,
-            job.Description,
-            job.Location,
-            job.CreatedAt
-        );
+        return job is null ? null : ToResponse(job);
     }
 
     public async Task<JobResponse?> CreateJobAsync(JobCreateRequest request)
@@ -60,20 +39,17 @@ public class JobService
             CompanyName = request.CompanyName,
             Description = request.Description,
             Location = request.Location,
+            Status = request.Status,
+            Type = request.Type,
+            RelatedUserId = request.RelatedUserId,
             CreatedAt = DateTime.UtcNow
         };
 
         await _jobRepository.AddAsync(job);
         await _jobRepository.SaveChangesAsync();
 
-        return new JobResponse(
-            job.Id,
-            job.Title,
-            job.CompanyName,
-            job.Description,
-            job.Location,
-            job.CreatedAt
-        );
+        var created = await _jobRepository.GetByIdAsync(job.Id);
+        return created is null ? null : ToResponse(created);
     }
 
     public async Task<JobResponse?> UpdateJobAsync(int id, JobUpdateRequest request)
@@ -85,41 +61,42 @@ public class JobService
         }
 
         var job = await _jobRepository.GetByIdForUpdateAsync(id);
-
-        if (job is null)
-        {
-            return null;
-        }
+        if (job is null) return null;
 
         job.Title = request.Title;
         job.CompanyName = request.CompanyName;
         job.Description = request.Description;
         job.Location = request.Location;
+        job.Status = request.Status;
+        job.Type = request.Type;
+        job.RelatedUserId = request.RelatedUserId;
 
         await _jobRepository.SaveChangesAsync();
 
-        return new JobResponse(
-            job.Id,
-            job.Title,
-            job.CompanyName,
-            job.Description,
-            job.Location,
-            job.CreatedAt
-        );
+        var updated = await _jobRepository.GetByIdAsync(id);
+        return updated is null ? null : ToResponse(updated);
     }
 
     public async Task<bool> DeleteJobAsync(int id)
     {
         var job = await _jobRepository.GetByIdForUpdateAsync(id);
-
-        if (job is null)
-        {
-            return false;
-        }
+        if (job is null) return false;
 
         _jobRepository.Delete(job);
         await _jobRepository.SaveChangesAsync();
-
         return true;
     }
+
+    private static JobResponse ToResponse(Job job) => new(
+        job.Id,
+        job.Title,
+        job.CompanyName,
+        job.Description,
+        job.Location,
+        job.Status,
+        job.Type,
+        job.RelatedUserId,
+        job.RelatedUser?.FullName ?? string.Empty,
+        job.CreatedAt
+    );
 }

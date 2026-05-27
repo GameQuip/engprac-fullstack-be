@@ -6,5 +6,9 @@ public record JobResponse(
     string CompanyName,
     string? Description,
     string? Location,
+    string Status,
+    string Type,
+    int RelatedUserId,
+    string RelatedUserName,
     DateTime CreatedAt
 );

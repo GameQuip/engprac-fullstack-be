@@ -1,30 +1,25 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Backend.Infrastructure;
 
-public class RoleAuthorizeAttribute : Attribute, IAuthorizationFilter
+public class RoleAuthorizeAttribute(string requiredRole) : Attribute, IAuthorizationFilter
 {
-    private readonly string _requiredRole;
-
-    public RoleAuthorizeAttribute(string requiredRole)
-    {
-        _requiredRole = requiredRole;
-    }
-
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var role = context.HttpContext.Request.Headers["X-User-Role"].FirstOrDefault();
+        var user = context.HttpContext.User;
 
-        if (string.IsNullOrWhiteSpace(role))
+        if (!user.Identity?.IsAuthenticated ?? true)
         {
-            context.Result = new UnauthorizedObjectResult("Missing X-User-Role header");
+            context.Result = new UnauthorizedObjectResult("Authentication required.");
             return;
         }
 
-        if (!string.Equals(role, _requiredRole, StringComparison.OrdinalIgnoreCase))
+        var role = user.FindFirst(ClaimTypes.Role)?.Value;
+        if (!string.Equals(role, requiredRole, StringComparison.OrdinalIgnoreCase))
         {
-            context.Result = new ForbidResult();
+            context.Result = new ObjectResult("Forbidden: insufficient role.") { StatusCode = 403 };
         }
     }
 }

@@ -1,213 +1,127 @@
-# 🚀 Full-Stack Team Challenge: Backend
+# JobTrack — Full-Stack App
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Angular](https://img.shields.io/badge/Angular-18+-DD0031?style=flat&logo=angular&logoColor=white)](https://angular.dev/)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Built With PrimeNG](https://img.shields.io/badge/UI-PrimeNG-4B0082?style=flat)](https://primeng.org/)
-
-[Add description]
-
-[🔗 Live Demo Link] | [🌐 API Documentation] | [🐛 Report a Bug]
+Angular 21 + ASP.NET Core 10 + PostgreSQL
 
 ---
 
-## ✨ Features
+## Run Locally
 
-- **🔒 Secure Authentication:** JWT-based user login, registration, and role-based access control (RBAC).
-- **📅 Dynamic Booking Engine:** Real-time availability validation to completely eliminate double-bookings.
-- **🎨 Responsive UI:** Built from the ground up using PrimeNG presets and PrimeFlex for flawless mobile and desktop views.
-- **📊 Admin Dashboard:** Comprehensive analytics, user moderation tools, and item inventory management.
-
----
-
-## 🛠️ Tech Stack & Architecture
-
-Detail the core ecosystem. This proves to technical recruiters that you know how your tools fit together.
-
-### Frontend
-
-- **Core:** Angular 18+ (Signals, Standalone Components)
-- **UI Components:** PrimeNG & PrimeIcons
-- **State & Styling:** RxJS & PrimeFlex
+### Prerequisites
+- .NET 10 SDK
+- Node.js 20+
+- Docker Desktop
 
 ### Backend
 
-- **API:** ASP.NET Core Web API (Clean Architecture / Onion Architecture)
-- **Database & ORM:** Entity Framework Core with [SQL Server / PostgreSQL / SQLite]
-- **Security:** ASP.NET Core Identity & JWT Bearer Tokens
+```bash
+cd engprac-fullstack-be
+docker compose up -d        # start PostgreSQL
+dotnet run                  # http://localhost:5118
+```
 
-### Architecture Diagram
+Swagger: http://localhost:5118/swagger
 
-```text
-┌─────────────────┐       HTTPS / JSON       ┌─────────────────────┐
-│   Angular UI    │ <──────────────────────> │ ASP.NET Core Web API│
-│   (PrimeNG)     │       (JWT Auth)         │ (Controllers/DTOs)  │
-└─────────────────┘                          └──────────┬──────────┘
-                                                        │ EF Core
-                                                        ▼
-                                             ┌─────────────────────┐
-                                             │  Database Instance  │
-                                             └─────────────────────┘
+### Frontend
 
+```bash
+cd engprac-fullstack-fe
+npm install
+npm start                   # http://localhost:4200
+```
+
+Demo accounts:
+- Admin: `alice@example.com` / `password123`
+- User: `bob@example.com` / `password123`
+
+---
+
+## Deploy to Production
+
+### ลำดับ deploy
+
+```
+Step 1 → Neon   (Database)
+Step 2 → Render (Backend)
+Step 3 → แก้ environment.prod.ts
+Step 4 → Vercel (Frontend)
+Step 5 → อัปเดต CORS บน Render
 ```
 
 ---
 
-## 🚀 Getting Started
+### Step 1 — Neon (Database)
 
-Follow these step-by-step instructions to get a local copy of the project up and running for development and testing.
-
-### 📋 Prerequisites
-
-List the software and versions required to build the project.
-
-- [Node.js](https://nodejs.org/) (v18.x or higher)
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- An IDE of choice ([VS Code](https://code.visualstudio.com/) or [Visual Studio](https://visualstudio.microsoft.com/))
-
-### 🔧 Installation & Configuration
-
-#### 1. Clone the Repository
-
-```bash
-git clone [https://github.com/yourusername/your-repo-name.git](https://github.com/yourusername/your-repo-name.git)
-cd your-repo-name
-
-```
-
-#### 2. Backend Setup (`/backend`)
-
-Navigate to your backend directory, configure settings, and spin up the server:
-
-```bash
-cd backend
-
-# Restore Nuget packages
-dotnet restore
-
-# Run EF Core Migrations to initialize the local database
-dotnet ef database update
-
-# Run the API
-dotnet run
-
-```
-
-> 💡 **Note:** The backend API will boot up locally at `http://localhost:5118`. You can access the Interactive Swagger documentation at `http://localhost:5118/swagger`.
-
-#### 3. Frontend Setup (`/frontend`)
-
-Open a new terminal window, navigate to your frontend directory, and run the client:
-
-```bash
-cd frontend
-
-# Install exact npm dependencies using clean install
-npm ci
-
-# Launch the local development server
-ng serve --open
-
-```
-
-Your browser will automatically launch and open the app at `http://localhost:4200`.
+1. สมัคร https://neon.tech → **Create Project**
+2. Region: `ap-southeast-1` (Singapore)
+3. Copy **Connection String**:
+   ```
+   postgresql://user:pass@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+   ```
 
 ---
 
-## ⚙️ Environment Configuration
+### Step 2 — Render (Backend)
 
-### Backend Configuration (`appsettings.Development.json`)
+1. สมัคร https://render.com → **New → Web Service**
+2. Connect GitHub repo → Root Directory: `engprac-fullstack-be`
+3. Runtime: **Docker** | Region: **Singapore**
+4. เพิ่ม Environment Variables:
 
-Ensure your local settings match this signature:
+| Key | Value |
+|-----|-------|
+| `ConnectionStrings__DefaultConnection` | `<Neon connection string>` |
+| `JwtSettings__Secret` | `<random string 32+ ตัว>` |
+| `AllowedOrigins` | `https://your-app.vercel.app` *(ใส่ทีหลังได้)* |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=YourLocalDb.db"
-  },
-  "JwtSettings": {
-    "Secret": "YourSuperSecretUnbreakableKeyNameHere123!",
-    "ExpiryInMinutes": 60
-  }
-}
-```
+5. Deploy → Copy URL เช่น `https://jobtrack-api.onrender.com`
 
-### Frontend Environment (`environment.development.ts`)
+> Render free tier จะ sleep หลังไม่มี traffic 15 นาที — request แรกจะช้า ~30 วิ
+
+---
+
+### Step 3 — แก้ Frontend ก่อน deploy
+
+แก้ไฟล์ `engprac-fullstack-fe/src/environments/environment.prod.ts`:
 
 ```typescript
 export const environment = {
-  production: false,
-  apiUrl: "http://localhost:5118/api",
+  production: true,
+  apiUrl: 'https://jobtrack-api.onrender.com/api'  // ← URL จาก Step 2
 };
 ```
 
 ---
 
-## 📂 Project Structure
+### Step 4 — Vercel (Frontend)
 
-```text
-├── backend/
-│   ├── Core/                 # Domain Entities, Interfaces, and Exceptions
-│   ├── Infrastructure/       # EF Core DB Context, Migrations, Repositories
-│   └── WebApi/               # Controllers, DTOs, Program.cs Configuration
-└── frontend/
-    └── src/
-        ├── app/
-        │   ├── core/         # Interceptors, Guards, Global Services
-        │   ├── features/     # Feature modules (Booking, Users, Inventory)
-        │   └── shared/       # Reusable wrapper components & pipes
-        └── assets/           # Global styles and static images
-
-```
+1. สมัคร https://vercel.com → **New Project**
+2. Connect GitHub repo → Root Directory: `engprac-fullstack-fe`
+3. Settings:
+   - **Framework Preset**: Angular
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist/frontend/browser`
+4. Deploy → Copy URL เช่น `https://jobtrack.vercel.app`
 
 ---
 
-## 🧪 Running Tests
+### Step 5 — อัปเดต CORS บน Render
 
-Explain how to execute the automated test suites built for this system.
-
-### Backend Unit Tests
-
-```bash
-cd backend/YourProject.Tests
-dotnet test
+Render Dashboard → Environment → แก้:
 
 ```
-
-### Frontend Unit & E2E Tests
-
-```bash
-cd frontend
-ng test     # Component Unit Tests
-ng e2e      # End-to-End Tests
-
+AllowedOrigins = https://jobtrack.vercel.app
 ```
+
+Save → Render redeploy อัตโนมัติ ✅
 
 ---
 
-## 🤝 Contributing
+## Tech Stack
 
-Contributions make the open-source community an amazing place to learn, inspire, and create.
-
-1. **Fork** the Project.
-2. Create your **Feature Branch** (`git checkout -b feature/AmazingFeature`).
-3. **Commit** your Changes (`git commit -m 'Add some AmazingFeature'`).
-4. **Push** to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a **Pull Request**.
-
----
-
-## 📄 License
-
-Distributed under the **MIT License**. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for more information.
-
----
-
-## 🧑‍💻 Contact & Acknowledgments
-
-- Project Link: [https://github.com/yourusername/your-repo-name](https://github.com/yourusername/your-repo-name)
-- Special thanks to the [PrimeNG](https://primeng.org/) team for their beautiful UI kit.
-
-```
-
-```
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Angular 21, PrimeNG 21, Signals |
+| Backend | ASP.NET Core 10, EF Core, JWT |
+| Database | PostgreSQL (Docker local / Neon prod) |
+| Auth | JWT Bearer + BCrypt |

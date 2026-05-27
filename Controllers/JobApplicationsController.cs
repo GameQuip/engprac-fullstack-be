@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Backend.Data;
 using Backend.DTOs.JobApplication;
 using Backend.Infrastructure;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/v1/applications")]
+[Authorize]
 public class JobApplicationsController : ControllerBase
 {
     private const string ApplicationStatusApplied = "Applied";
@@ -27,17 +30,17 @@ public class JobApplicationsController : ControllerBase
         userId = 0;
         errorResult = null;
 
-        var userIdValue = Request.Headers["X-User-Id"].FirstOrDefault();
+        var claim = User.FindFirst("userId")?.Value;
 
-        if (string.IsNullOrWhiteSpace(userIdValue))
+        if (string.IsNullOrWhiteSpace(claim))
         {
-            errorResult = Unauthorized("Missing X-User-Id header");
+            errorResult = Unauthorized("Authentication required.");
             return false;
         }
 
-        if (!int.TryParse(userIdValue, out userId))
+        if (!int.TryParse(claim, out userId))
         {
-            errorResult = BadRequest("Invalid X-User-Id header");
+            errorResult = BadRequest("Invalid user ID in token.");
             return false;
         }
 

@@ -44,12 +44,27 @@ namespace backend.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("text");
 
+                    b.Property<int>("RelatedUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RelatedUserId");
 
                     b.ToTable("Jobs");
                 });
@@ -78,9 +93,10 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("JobId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("JobApplications");
                 });
@@ -105,6 +121,10 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text");
@@ -115,6 +135,17 @@ namespace backend.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Backend.Models.Job", b =>
+                {
+                    b.HasOne("Backend.Models.User", "RelatedUser")
+                        .WithMany()
+                        .HasForeignKey("RelatedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RelatedUser");
                 });
 
             modelBuilder.Entity("Backend.Models.JobApplication", b =>
