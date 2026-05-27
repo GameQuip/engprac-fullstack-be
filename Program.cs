@@ -67,12 +67,9 @@ using (var scope = app.Services.CreateScope())
     SeedData(db);
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 if (!app.Environment.IsProduction())
     app.UseHttpsRedirection();
